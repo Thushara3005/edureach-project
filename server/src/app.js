@@ -4,11 +4,18 @@ import chatRoutes from "./routes/chat.routes.js";
 import errorHandler from "./middleware/error-handler.middleware.js";
 
 const app = express();
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173,http://127.0.0.1:5173").split(",");
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://127.0.0.1:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Origin not allowed"));
+    },
     credentials: true,
     methods: ["POST"],
     allowedHeaders: ["Content-Type"],
